@@ -1,9 +1,11 @@
 "use strict";
 const VERSION="0.2.1", DEFAULT_API="https://www.diving-fish.com/api/chunithmprober", PREFIX="chunidata_v2_";
-const $=id=>document.getElementById(id);\nwindow.addEventListener("error",event=>{const n=$("notice");if(n)n.textContent="界面脚本错误："+event.message+"；请刷新页面。";});
+const $=id=>document.getElementById(id);
+window.addEventListener("error",event=>{const n=$("notice");if(n)n.textContent="界面脚本错误："+event.message+"；请刷新页面。";});
 const read=(key,fallback)=>{try{const raw=localStorage.getItem(PREFIX+key);return raw===null?fallback:JSON.parse(raw)}catch{return fallback}};
 const write=(key,val)=>{try{localStorage.setItem(PREFIX+key,JSON.stringify(val))}catch{showMessage("无法写入本地缓存，请检查浏览器存储设置。",true)}};
-let settings=read("settings",{username:"",auto:false}), player=null, songs=read("songs",[]), latest=read("latest",[]), demo=false, batch=30;\nif(!settings||typeof settings!=="object")settings={username:"",auto:false};if(!Array.isArray(songs))songs=[];if(!Array.isArray(latest))latest=[];
+let settings=read("settings",{username:"",auto:false}), player=null, songs=read("songs",[]), latest=read("latest",[]), demo=false, batch=30;
+if(!settings||typeof settings!=="object")settings={username:"",auto:false};if(!Array.isArray(songs))songs=[];if(!Array.isArray(latest))latest=[];
 let lastPlayer=null, lastSongs=read("songsAt",null);
 const DIFFICULTIES=["BASIC","ADVANCED","EXPERT","MASTER","ULTIMA","WORLD'S END"];
 const safeNum=x=>Number.isFinite(Number(x))?Number(x):0;
@@ -35,4 +37,4 @@ async function checkUpdate(){try{const res=await fetch("./version.json?t="+Date.
 $("check-update").addEventListener("click",checkUpdate);
 try{render()}catch(error){showMessage("初始渲染失败："+error.message,true);console.error(error)}\nif(settings.auto===true)loadSongs();
 
-const qrButton=$("qr-once");if(qrButton)qrButton.addEventListener("click",()=>{const box=$("qr-input"),result=$("qr-result");const value=(box.value||"").trim();if(!value){result.textContent="请先输入二维码解析文本。";return}result.textContent="当前尚未接入获授权的国服二维码同步服务，本次未发送任何数据；请勿在网页提交可登录账号的敏感凭证。";box.value="";});\n
+const qrButton=$("qr-once");if(qrButton)qrButton.addEventListener("click",()=>{const box=$("qr-input"),result=$("qr-result");const value=(box.value||"").trim();if(!value){result.textContent="请先输入二维码解析文本。";return}result.textContent="当前尚未接入获授权的国服二维码同步服务，本次未发送任何数据；请勿在网页提交可登录账号的敏感凭证。";box.value="";});
