@@ -1,5 +1,5 @@
 "use strict";
-const VERSION="0.3.0", DEFAULT_API="https://www.diving-fish.com/api/chunithmprober", PREFIX="chunidata_v2_";
+const VERSION="0.3.1", DEFAULT_API="https://www.diving-fish.com/api/chunithmprober", PREFIX="chunidata_v2_";
 const $=id=>document.getElementById(id);
 window.addEventListener("error",event=>{const n=$("notice");if(n)n.textContent="界面脚本错误："+event.message+"；请刷新页面。";});
 const read=(key,fallback)=>{try{const raw=localStorage.getItem(PREFIX+key);return raw===null?fallback:JSON.parse(raw)}catch{return fallback}};
@@ -38,4 +38,18 @@ $("check-update").addEventListener("click",checkUpdate);
 try{render()}catch(error){showMessage("初始渲染失败："+error.message,true);console.error(error)}
 if(settings.auto===true)loadSongs();
 
-const qrButton=$("qr-once");if(qrButton)qrButton.addEventListener("click",()=>{const box=$("qr-input"),result=$("qr-result");const value=(box.value||"").trim();if(!value){result.textContent="请先输入二维码解析文本。";return}result.textContent="当前尚未接入获授权的国服二维码同步服务，本次未发送任何数据；请勿在网页提交可登录账号的敏感凭证。";box.value="";});
+const qrButton=$("qr-once");
+function inspectQr(raw){
+  const value=String(raw||"").trim().toUpperCase();
+  if(!value)return {ok:false,reason:"请输入二维码解析文本"};
+  if(value.length>256)return {ok:false,reason:"解析文本长度超过本地格式检测限制"};
+  if(!/^SGWCMAID[0-9A-F]+$/.test(value))return {ok:false,reason:"文本不符合已观察到的 SGWCMAID + 十六进制字符形式"};
+  return {ok:true,length:value.length,prefix:"SGWCMAID",note:"只检查字符结构，不代表二维码仍有效、已授权或已识别玩家 UID。"};
+}
+if(qrButton)qrButton.addEventListener("click",()=>{
+  const box=$("qr-input"),result=$("qr-result");
+  const check=inspectQr(box.value);
+  box.value="";
+  if(!check.ok){result.textContent="格式检测未通过："+check.reason;return}
+  result.textContent="本地格式检查通过（前缀 "+check.prefix+"；总长度 "+check.length+" 字符）。未调用第三方服务，尚未取得 UID。EasyMai 的 /apiqr、/getUserMusic 依赖作者自己的服务，无法直接作为国服授权 API 使用。水鱼 /player/update_records 需要已取得的真实成绩和合法导入权限，不能通过二维码自行生成成绩。";
+});
