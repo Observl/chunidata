@@ -23,3 +23,8 @@ Settings → Pages → Source 选择 GitHub Actions，推送 `main` 自动运行
 - 游戏商标及曲库数据归各自权利人所有。商用须确认接口和资产使用许可。
 
 参考：[Diving-Fish API 文档](https://maimai.diving-fish.com/manual/docs/developer/zh-api-document/) · [OAuth 文档](https://maimai.diving-fish.com/manual/docs/developer/oauth-api-document/)
+
+## v0.2.1 交互修复及一次性绑定说明
+- 修复前端脚本加载/初始化交互问题；给浏览器脚本添加版本号以绕开旧缓存。
+- 用户成绩不再持久化保存、不再自动刷新；公开成绩仅手动查询。
+- 增加二维码文本一次性提交的界面占位；**尚未接入经过授权的国服成绩同步端点，因此不执行真实的二维码登录或传分**。输入的二维码文本不会被发送，也不会被保存。
