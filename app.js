@@ -35,6 +35,7 @@ $("settings-form").addEventListener("submit",e=>{e.preventDefault();const old=se
 $("clear-data").addEventListener("click",()=>{if(!confirm("确认清空本网站的成绩缓存、曲库和设置？"))return;Object.keys(localStorage).filter(k=>k.startsWith(PREFIX)).forEach(k=>localStorage.removeItem(k));settings={username:"",auto:false};player=null;songs=[];latest=[];demo=false;lastPlayer=lastSongs=null;$("username").value="";$("auto-load").checked=false;render();showMessage("缓存与设置已清空。")});
 async function checkUpdate(){try{const res=await fetch("./version.json?t="+Date.now(),{cache:"no-store"});if(!res.ok)throw Error("HTTP "+res.status);const data=await res.json();$("update-info").textContent=data.version===VERSION?`当前已是最新版本 v${VERSION}。`:`当前版本 v${VERSION}，服务器版本 v${data.version||"未知"}。请刷新页面。`}catch(e){$("update-info").textContent="无法检查版本："+e.message}}
 $("check-update").addEventListener("click",checkUpdate);
-try{render()}catch(error){showMessage("初始渲染失败："+error.message,true);console.error(error)}\nif(settings.auto===true)loadSongs();
+try{render()}catch(error){showMessage("初始渲染失败："+error.message,true);console.error(error)}
+if(settings.auto===true)loadSongs();
 
 const qrButton=$("qr-once");if(qrButton)qrButton.addEventListener("click",()=>{const box=$("qr-input"),result=$("qr-result");const value=(box.value||"").trim();if(!value){result.textContent="请先输入二维码解析文本。";return}result.textContent="当前尚未接入获授权的国服二维码同步服务，本次未发送任何数据；请勿在网页提交可登录账号的敏感凭证。";box.value="";});
