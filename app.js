@@ -1,0 +1,18 @@
+"use strict";
+const STORAGE_KEY="chunidata_records_v1";
+let records=loadRecords();
+function loadRecords(){try{const data=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");return Array.isArray(data)?data.filter(x=>x&&typeof x.song==="string"&&Number.isFinite(x.score)):[]}catch{return []}}
+function save(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(records));return true}catch{alert("无法保存记录：浏览器存储不可用或空间不足。");return false}}
+const $=id=>document.getElementById(id);
+const title={dashboard:"成绩总览",records:"歌曲成绩",add:"录入成绩",about:"关于项目"};
+function go(name){if(!title[name])return;document.querySelectorAll(".view").forEach(el=>el.classList.toggle("active",el.id===name));document.querySelectorAll(".nav").forEach(el=>el.classList.toggle("active",el.dataset.view===name));$("page-title").textContent=title[name];if(name==="records")renderRecords();window.scrollTo({top:0,behavior:"smooth"})}
+document.querySelectorAll("[data-view]").forEach(el=>el.addEventListener("click",()=>go(el.dataset.view)));
+document.querySelectorAll("[data-go]").forEach(el=>el.addEventListener("click",()=>go(el.dataset.go)));
+function recordNode(item){const row=document.createElement("div");row.className="record";const info=document.createElement("div");const name=document.createElement("strong");name.textContent=item.song;const meta=document.createElement("small");meta.textContent=item.difficulty+(item.constant?" · 定数 "+item.constant:"")+" · "+new Date(item.createdAt).toLocaleDateString("zh-CN");info.append(name,meta);const right=document.createElement("div");right.className="record-actions";const score=document.createElement("span");score.className="score";score.textContent=item.score.toLocaleString("en-US");const del=document.createElement("button");del.className="delete";del.type="button";del.textContent="删除";del.setAttribute("aria-label","删除 "+item.song);del.addEventListener("click",()=>{if(confirm("确定删除这条本地成绩吗？")){records=records.filter(x=>x.id!==item.id);save();renderAll()}});right.append(score,del);row.append(info,right);return row}
+function renderList(id,items){const el=$(id);el.replaceChildren();if(!items.length){const empty=document.createElement("p");empty.className="empty";empty.textContent="暂无符合条件的成绩，请先录入。";el.append(empty)}else items.forEach(item=>el.append(recordNode(item)))}
+function renderRecords(){const q=$("search").value.toLocaleLowerCase().trim();const diff=$("difficulty").value;renderList("record-list",records.filter(r=>r.song.toLocaleLowerCase().includes(q)&&(!diff||r.difficulty===diff)))}
+function renderAll(){$("record-count").textContent=String(records.length);renderList("recent-records",records.slice(0,3));renderRecords()}
+$("search").addEventListener("input",renderRecords);$("difficulty").addEventListener("change",renderRecords);
+$("add-form").addEventListener("submit",event=>{event.preventDefault();const data=new FormData(event.currentTarget);const song=String(data.get("song")||"").trim();const score=Number(data.get("score"));const constantText=String(data.get("constant")||"").trim();const constant=constantText?Number(constantText):null;if(!song||!Number.isInteger(score)||score<0||score>1010000||constant!==null&&(!Number.isFinite(constant)||constant<1||constant>20)){$("form-feedback").textContent="请检查歌曲名称、成绩和定数。";return}records.unshift({id:crypto.randomUUID?crypto.randomUUID():String(Date.now())+"-"+Math.random(),song,difficulty:String(data.get("difficulty")),score,constant,createdAt:new Date().toISOString()});if(!save()){records.shift();return}event.currentTarget.reset();$("form-feedback").textContent="保存成功";renderAll();go("records")});
+$("reset").addEventListener("click",()=>{if(confirm("清空此浏览器中的全部本地成绩？该操作无法撤销。")){records=[];save();renderAll();go("dashboard")}});
+renderAll();
