@@ -24,3 +24,5 @@
 
 ## 本地使用
 直接打开 index.html；不需要 Node、npm 或构建步骤。
+
+<!-- Pages redeploy requested after enabling GitHub Actions publishing. -->
